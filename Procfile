@@ -1,1 +1,1 @@
-web: gunicorn -k gevent -w 1 streamlit_app:app --preload
+web: streamlit run streamlit_app.py --server.port $PORT --server.headless true
