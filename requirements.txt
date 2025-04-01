@@ -3,7 +3,4 @@ pandas
 requests
 beautifulsoup4
 gunicorn
-tensorflow
-pillow
-numpy
 selenium

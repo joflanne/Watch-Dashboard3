@@ -10,7 +10,6 @@ from scraper import (
 from datetime import datetime
 import os
 
-# Local file storage (Heroku’s filesystem is ephemeral, but fine for hourly runs)
 DATA_FILE = "watches.csv"
 LOGS_FILE = "scraper_log.csv"
 HISTORICAL_FILE = "historical_deals.csv"
@@ -40,7 +39,7 @@ def load_data():
     data['Expected Profit'] = data['Predicted Resale'] - data['Price']
     data['ROI (%)'] = (data['Expected Profit'] / data['Price']) * 100
     
-    data['Authenticity'] = data.apply(detect_fake, axis=1)
+    data['Authenticity'] = data.apply(detect_fake, axis=1)  # Image analysis removed
     data['Liquidity'] = data.apply(lambda row: estimate_liquidity(row['Brand'], row['Model']), axis=1)
     data['Age (Days)'] = data['Date Listed'].apply(lambda x: (datetime.now() - datetime.strptime(x, '%Y-%m-%d')).days)
     
