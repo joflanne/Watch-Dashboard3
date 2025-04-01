@@ -342,4 +342,446 @@ def scrape_phillips(max_price):
                 if price > max_price:
                     continue
                 title = item.select_one('.lot-title').text.strip()
-                url = 'https://www.p
+                url = 'https://www.phillips.com' + item.select_one('a')['href']
+                image_url = item.select_one('.lot-image')['src'] if item.select_one('.lot-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Phillips',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_bonhams(max_price):
+    url = "https://www.bonhams.com/departments/WAT/?price_range=0-2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.lot'):
+            try:
+                price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.lot-title').text.strip()
+                url = 'https://www.bonhams.com' + item.select_one('a')['href']
+                image_url = item.select_one('.lot-image')['src'] if item.select_one('.lot-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Bonhams',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_antiquorum(max_price):
+    url = "https://www.antiquorum.swiss/?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.lot-item'):
+            try:
+                price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.lot-title').text.strip()
+                url = 'https://www.antiquorum.swiss' + item.select_one('a')['href']
+                image_url = item.select_one('.lot-image')['src'] if item.select_one('.lot-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Antiquorum',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_watchuseek(max_price):
+    url = "https://www.watchuseek.com/forums/watch-sales-forum.16/"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.thread'):
+            try:
+                price_str = item.select_one('.price').text.replace('$', '').replace(',', '') if item.select_one('.price') else '0'
+                price = float(price_str)
+                if price > max_price or price == 0:
+                    continue
+                title = item.select_one('.threadtitle').text.strip()
+                url = 'https://www.watchuseek.com' + item.select_one('a')['href']
+                image_url = item.select_one('.thread-image')['src'] if item.select_one('.thread-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Watchuseek',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': len(soup.select('.thread')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_reddit(max_price):
+    url = "https://www.reddit.com/r/WatchExchange/new/"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.Post'):
+            try:
+                price_str = item.select_one('.price').text.replace('$', '').replace(',', '') if item.select_one('.price') else '0'
+                price = float(price_str)
+                if price > max_price or price == 0:
+                    continue
+                title = item.select_one('.title').text.strip()
+                url = 'https://www.reddit.com' + item.select_one('a')['href']
+                image_url = item.select_one('.thumbnail')['src'] if item.select_one('.thumbnail') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Reddit WatchExchange',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': len(soup.select('.Post')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_catawiki(max_price):
+    url = "https://www.catawiki.com/en/c/7-watches?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.lot'):
+            try:
+                price_str = item.select_one('.lot-price').text.replace('€', '').replace(',', '').strip()
+                price = get_usd_price(float(price_str), 'EUR')
+                if price > max_price:
+                    continue
+                title = item.select_one('.lot-title').text.strip()
+                url = 'https://www.catawiki.com' + item.select_one('a')['href']
+                image_url = item.select_one('.lot-image')['src'] if item.select_one('.lot-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Catawiki',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_timepeaks(max_price):
+    url = "https://timepeaks.com/?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.item'):
+            try:
+                price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.item-title').text.strip()
+                url = 'https://timepeaks.com' + item.select_one('a')['href']
+                image_url = item.select_one('.item-image')['src'] if item.select_one('.item-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Timepeaks',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_bobs_watches(max_price):
+    url = "https://www.bobswatches.com/auctions?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.auction-item'):
+            try:
+                price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.auction-title').text.strip()
+                url = 'https://www.bobswatches.com' + item.select_one('a')['href']
+                image_url = item.select_one('.auction-image')['src'] if item.select_one('.auction-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Bob’s Watches',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': len(soup.select('.auction-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_1stdibs(max_price):
+    url = "https://www.1stdibs.com/jewelry/watches/?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.item'):
+            try:
+                price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.item-title').text.strip()
+                url = 'https://www.1stdibs.com' + item.select_one('a')['href']
+                image_url = item.select_one('.item-image')['src'] if item.select_one('.item-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': '1stDibs',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_watchcollecting(max_price):
+    url = "https://watchcollecting.com/?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.lot'):
+            try:
+                price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.lot-title').text.strip()
+                url = 'https://watchcollecting.com' + item.select_one('a')['href']
+                image_url = item.select_one('.lot-image')['src'] if item.select_one('.lot-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'WatchCollecting',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_invaluable(max_price):
+    url = "https://www.invaluable.com/watches/sc-7L7J8J8J8J/?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.lot'):
+            try:
+                price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.lot-title').text.strip()
+                url = 'https://www.invaluable.com' + item.select_one('a')['href']
+                image_url = item.select_one('.lot-image')['src'] if item.select_one('.lot-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'Invaluable',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def scrape_liveauctioneers(max_price):
+    url = "https://www.liveauctioneers.com/c/watches/7/?price_max=2000"
+    listings = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.lot'):
+            try:
+                price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
+                price = float(price_str)
+                if price > max_price:
+                    continue
+                title = item.select_one('.lot-title').text.strip()
+                url = 'https://www.liveauctioneers.com' + item.select_one('a')['href']
+                image_url = item.select_one('.lot-image')['src'] if item.select_one('.lot-image') else ''
+                brand, model = parse_title(title)
+                listings.append({
+                    'Date Listed': datetime.now().strftime('%Y-%m-%d'),
+                    'Platform': 'LiveAuctioneers',
+                    'Brand': brand,
+                    'Model': model,
+                    'Price': price,
+                    'Listing URL': url,
+                    'Image URL': image_url,
+                    'Description': title
+                })
+            except:
+                continue
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+    except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+    update_logs(log_entry)
+    time.sleep(random.uniform(1, 3))
+    return pd.DataFrame(listings)
+
+def detect_fake(row):
+    if 'no serial' in row['Description'].lower() or 'replica' in row['Description'].lower() or row['Price'] < 100:
+        return 'Likely Fake'
+    market_prices = {'Rolex Submariner': 8000, 'Seiko Prospex': 400, 'Omega Speedmaster': 3000}
+    key = f"{row['Brand']} {row['Model']}"
+    if key in market_prices and row['Price'] < market_prices[key] * 0.3:
+        return 'Likely Fake'
+    return 'Likely Genuine'
+
+def estimate_liquidity(brand, model):
+    sold_data = scrape_ebay_sold(brand, model)
+    avg_days = sum([d['Days Ago'] for d in sold_data]) / len(sold_data) if sold_data else 30
+    return 'High' if avg_days < 14 else 'Low'
+
+def get_resale_price(brand, model):
+    sold_data = scrape_ebay_sold(brand, model)
+    return sum([d['Price'] for d in sold_data]) / len(sold_data) if sold_data else None
+
+def scrape_ebay_sold(brand, model):
+    url = f"https://www.ebay.com/sch/i.html?_nkw={brand}+{model}&LH_Sold=1&LH_Complete=1"
+    sold_data = []
+    try:
+        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for item in soup.select('.s-item'):
+            try:
+                price_str = item.select_one('.s-item__price').text.replace('$', '').replace(',', '')
+                price = float(price_str.split(' to ')[0] if ' to ' in price_str else price_str)
+                date_sold = item.select_one('.s-item__ended-date').text.strip()
+                days_ago = (datetime.now() - datetime.strptime(date_sold, '%b-%d %H:%M')).days
+                sold_data.append({'Price': price, 'Days Ago': days_ago})
+            except:
+                continue
+    except:
+        pass
+    return sold_data
