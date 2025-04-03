@@ -5,12 +5,11 @@ from datetime import datetime
 import time
 import random
 
-# Bright Data proxy URL with your credentials
+# Bright Data proxy URL
 PROXY = "http://brd-customer-hl_a1966b18-zone-watcharbitrageproxy:qn8vxsi6tjtz@brd.superproxy.io:22225"
 def get_proxy():
     return {'http': PROXY, 'https': PROXY}
 
-# Rotating User-Agents to mimic real browsers
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
@@ -18,7 +17,6 @@ USER_AGENTS = [
     'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Mobile/15E148 Safari/604.1',
 ]
 
-# Headers to emulate a real browser
 HEADERS = {
     'User-Agent': random.choice(USER_AGENTS),
     'Accept-Language': 'en-US,en;q=0.9',
@@ -56,7 +54,7 @@ def get_usd_price(price, currency):
     if currency == 'USD':
         return price
     try:
-        rates = requests.get("https://api.exchangerate-api.com/v4/latest/USD", headers=HEADERS, proxies=get_proxy()).json()['rates']
+        rates = requests.get("https://api.exchangerate-api.com/v4/latest/USD", headers=HEADERS, proxies=get_proxy(), verify=False).json()['rates']
         return price / rates[currency] if currency in rates else price
     except:
         return price
@@ -65,7 +63,7 @@ def scrape_ebay(max_price):
     url = "https://www.ebay.com/sch/i.html?_nkw=used+watches&_sacat=0&rt=nc&LH_ItemCondition=3000&_pgn=1"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.s-item')[:10]
@@ -105,7 +103,7 @@ def scrape_chrono24(max_price):
     url = "https://www.chrono24.com/search/index.htm?condition=used&priceMax=2000&sortorder=1"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.article-item')[:10]
@@ -144,7 +142,7 @@ def scrape_watchbox(max_price):
     url = "https://www.watchbox.com/shop/pre-owned-watches/"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.product-tile')[:10]
@@ -183,7 +181,7 @@ def scrape_yahoo_japan(max_price):
     url = "https://auctions.yahoo.co.jp/category/list/2084046857/?p=%E6%99%82%E8%A8%88&price_type=currentprice&max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.Product')[:10]
@@ -222,7 +220,7 @@ def scrape_jomashop(max_price):
     url = "https://www.jomashop.com/preowned-watches.html?price=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.product-item')[:10]
@@ -261,7 +259,7 @@ def scrape_crown_caliber(max_price):
     url = "https://www.crownandcaliber.com/collections/pre-owned-watches?sort_by=price-ascending&filter.v.price.gte=0&filter.v.price.lte=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.product-grid-item')[:10]
@@ -300,7 +298,7 @@ def scrape_sothebys(max_price):
     url = "https://www.sothebys.com/en/buy/watches?sort=price-asc&price_range=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot-item')[:10]
@@ -339,7 +337,7 @@ def scrape_christies(max_price):
     url = "https://www.christies.com/en/auctions/watches?sortby=PriceLowToHigh&priceRange=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
@@ -378,7 +376,7 @@ def scrape_phillips(max_price):
     url = "https://www.phillips.com/auctions/department/watches?price_range=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot-item')[:10]
@@ -417,7 +415,7 @@ def scrape_bonhams(max_price):
     url = "https://www.bonhams.com/departments/WAT/?price_range=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
@@ -456,7 +454,7 @@ def scrape_antiquorum(max_price):
     url = "https://www.antiquorum.swiss/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot-item')[:10]
@@ -495,7 +493,7 @@ def scrape_watchuseek(max_price):
     url = "https://www.watchuseek.com/forums/watch-sales-forum.16/"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.thread')[:10]
@@ -534,7 +532,7 @@ def scrape_reddit(max_price):
     url = "https://www.reddit.com/r/WatchExchange/new/"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.Post')[:10]
@@ -573,7 +571,7 @@ def scrape_catawiki(max_price):
     url = "https://www.catawiki.com/en/c/7-watches?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
@@ -612,7 +610,7 @@ def scrape_timepeaks(max_price):
     url = "https://timepeaks.com/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.item')[:10]
@@ -651,7 +649,7 @@ def scrape_bobs_watches(max_price):
     url = "https://www.bobswatches.com/auctions?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.auction-item')[:10]
@@ -690,7 +688,7 @@ def scrape_1stdibs(max_price):
     url = "https://www.1stdibs.com/jewelry/watches/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.item')[:10]
@@ -729,7 +727,7 @@ def scrape_watchcollecting(max_price):
     url = "https://watchcollecting.com/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
@@ -768,7 +766,7 @@ def scrape_invaluable(max_price):
     url = "https://www.invaluable.com/watches/sc-7L7J8J8J8J/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
@@ -807,7 +805,7 @@ def scrape_liveauctioneers(max_price):
     url = "https://www.liveauctioneers.com/c/watches/7/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
