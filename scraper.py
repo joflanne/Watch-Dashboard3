@@ -5,10 +5,12 @@ from datetime import datetime
 import time
 import random
 
+# Bright Data proxy URL with your credentials
 PROXY = "http://brd-customer-hl_a1966b18-zone-watcharbitrageproxy:qn8vxsi6tjtz@brd.superproxy.io:22225"
 def get_proxy():
     return {'http': PROXY, 'https': PROXY}
 
+# Rotating User-Agents to mimic real browsers
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
@@ -16,6 +18,7 @@ USER_AGENTS = [
     'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Mobile/15E148 Safari/604.1',
 ]
 
+# Headers to emulate a real browser
 HEADERS = {
     'User-Agent': random.choice(USER_AGENTS),
     'Accept-Language': 'en-US,en;q=0.9',
@@ -838,43 +841,3 @@ def scrape_liveauctioneers(max_price):
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
-
-def detect_fake(row):
-    if 'no serial' in row['Description'].lower() or 'replica' in row['Description'].lower() or row['Price'] < 100:
-        return 'Likely Fake'
-    market_prices = {'Rolex Submariner': 8000, 'Seiko Prospex': 400, 'Omega Speedmaster': 3000}
-    key = f"{row['Brand']} {row['Model']}"
-    if key in market_prices and row['Price'] < market_prices[key] * 0.3:
-        return 'Likely Fake'
-    return 'Likely Genuine'
-
-def estimate_liquidity(brand, model):
-    sold_data = scrape_ebay_sold(brand, model)
-    avg_days = sum([d['Days Ago'] for d in sold_data]) / len(sold_data) if sold_data else 30
-    return 'High' if avg_days < 14 else 'Low'
-
-def get_resale_price(brand, model):
-    sold_data = scrape_ebay_sold(brand, model)
-    return sum([d['Price'] for d in sold_data]) / len(sold_data) if sold_data else None
-
-def scrape_ebay_sold(brand, model):
-    url = f"https://www.ebay.com/sch/i.html?_nkw={brand}+{model}&LH_Sold=1&LH_Complete=1"
-    sold_data = []
-    try:
-        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
-        items = soup.select('.s-item')[:10]
-        print(f"eBay Sold response status: {response.status_code}, items found: {len(items)}")
-        for item in items:
-            try:
-                price_str = item.select_one('.s-item__price').text.replace('$', '').replace(',', '')
-                price = float(price_str.split(' to ')[0] if ' to ' in price_str else price_str)
-                date_sold = item.select_one('.s-item__ended-date').text.strip()
-                days_ago = (datetime.now() - datetime.strptime(date_sold, '%b-%d %H:%M')).days
-                sold_data.append({'Price': price, 'Days Ago': days_ago})
-            except Exception as e:
-                print(f"eBay Sold item parse error: {str(e)}")
-    except Exception as e:
-        print(f"eBay Sold request failed: {str(e)}")
-    return sold_data
