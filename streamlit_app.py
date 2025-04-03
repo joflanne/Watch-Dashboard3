@@ -31,7 +31,11 @@ def load_data():
         scrape_antiquorum(2000), scrape_watchuseek(2000), scrape_reddit(2000), scrape_catawiki(2000), scrape_timepeaks(2000),
         scrape_bobs_watches(2000), scrape_1stdibs(2000), scrape_watchcollecting(2000), scrape_invaluable(2000), scrape_liveauctioneers(2000)
     ]
-    data = pd.concat([d for d in data_sources if not d.empty], ignore_index=True)
+    valid_data = [d for d in data_sources if not d.empty]
+    if valid_data:
+        data = pd.concat(valid_data, ignore_index=True)
+    else:
+        data = pd.DataFrame(columns=['Date Listed', 'Platform', 'Brand', 'Model', 'Price', 'Listing URL', 'Image URL', 'Description'])
     
     data['Predicted Resale'] = data.apply(lambda row: get_resale_price(row['Brand'], row['Model']) or row['Price'] * 1.7, axis=1)
     data['Expected Profit'] = data['Predicted Resale'] - data['Price']
@@ -39,7 +43,7 @@ def load_data():
     
     data['Authenticity'] = data.apply(detect_fake, axis=1)
     data['Liquidity'] = data.apply(lambda row: estimate_liquidity(row['Brand'], row['Model']), axis=1)
-    data['Age (Days)'] = data['Date Listed'].apply(lambda x: (datetime.now() - datetime.strptime(x, '%Y-%m-%d')).days)
+    data['Age (Days)'] = data['Date Listed'].apply(lambda x: (datetime.now() - datetime.strptime(x, '%Y-%m-%d')).days if pd.notna(x) else 0)
     
     save_to_file(DATA_FILE, data)
     return data
