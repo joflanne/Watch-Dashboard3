@@ -875,9 +875,6 @@ def scrape_ebay_sold(brand, model):
                 sold_data.append({'Price': price, 'Days Ago': days_ago})
             except Exception as e:
                 print(f"eBay Sold item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay Sold', 'Listings Found': len(soup.select('.s-item')), 'Listings Saved': len(sold_data), 'Errors': 'None'}
     except Exception as e:
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay Sold', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"eBay Sold request failed: {str(e)}")
-    update_logs(log_entry)
     return sold_data
