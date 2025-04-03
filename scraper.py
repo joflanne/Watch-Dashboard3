@@ -5,13 +5,26 @@ from datetime import datetime
 import time
 import random
 
-PROXY = "http://USERNAME:PASSWORD@zproxy.lum-superproxy.io:22225"  # Placeholder, update later
+# Bright Data proxy URL with your credentials
+PROXY = "http://brd-customer-hl_a1966b18-zone-watcharbitrageproxy:qn8vxsi6tjtz@brd.superproxy.io:22225"
 def get_proxy():
     return {'http': PROXY, 'https': PROXY}
 
+# Rotating User-Agents to mimic real browsers
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Mobile/15E148 Safari/604.1',
+]
+
+# Headers to emulate a real browser
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'User-Agent': random.choice(USER_AGENTS),
     'Accept-Language': 'en-US,en;q=0.9',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Referer': 'https://www.google.com/',
+    'Connection': 'keep-alive',
 }
 
 def save_to_file(filename, data):
@@ -43,7 +56,7 @@ def get_usd_price(price, currency):
     if currency == 'USD':
         return price
     try:
-        rates = requests.get("https://api.exchangerate-api.com/v4/latest/USD").json()['rates']
+        rates = requests.get("https://api.exchangerate-api.com/v4/latest/USD", headers=HEADERS, proxies=get_proxy()).json()['rates']
         return price / rates[currency] if currency in rates else price
     except:
         return price
@@ -52,9 +65,11 @@ def scrape_ebay(max_price):
     url = "https://www.ebay.com/sch/i.html?_nkw=used+watches&_sacat=0&rt=nc&LH_ItemCondition=3000&_pgn=1"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.s-item'):
+        items = soup.select('.s-item')[:10]  # Limit to 10 items
+        for item in items:
             try:
                 price_str = item.select_one('.s-item__price').text.replace('$', '').replace(',', '')
                 price = float(price_str.split(' to ')[0] if ' to ' in price_str else price_str)
@@ -81,16 +96,18 @@ def scrape_ebay(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_chrono24(max_price):
     url = "https://www.chrono24.com/search/index.htm?condition=used&priceMax=2000&sortorder=1"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.article-item'):
+        items = soup.select('.article-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.strip().replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -116,16 +133,18 @@ def scrape_chrono24(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Chrono24', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_watchbox(max_price):
     url = "https://www.watchbox.com/shop/pre-owned-watches/"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.product-tile'):
+        items = soup.select('.product-tile')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price-sales').text.strip().replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -151,16 +170,18 @@ def scrape_watchbox(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchBox', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_yahoo_japan(max_price):
     url = "https://auctions.yahoo.co.jp/category/list/2084046857/?p=%E6%99%82%E8%A8%88&price_type=currentprice&max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.Product'):
+        items = soup.select('.Product')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.Product__priceValue').text.replace('¥', '').replace(',', '')
                 price = get_usd_price(float(price_str), 'JPY')
@@ -186,16 +207,18 @@ def scrape_yahoo_japan(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Yahoo Japan', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_jomashop(max_price):
     url = "https://www.jomashop.com/preowned-watches.html?price=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.product-item'):
+        items = soup.select('.product-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -221,16 +244,18 @@ def scrape_jomashop(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Jomashop', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_crown_caliber(max_price):
     url = "https://www.crownandcaliber.com/collections/pre-owned-watches?sort_by=price-ascending&filter.v.price.gte=0&filter.v.price.lte=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.product-grid-item'):
+        items = soup.select('.product-grid-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price__current').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -256,16 +281,18 @@ def scrape_crown_caliber(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Crown & Caliber', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_sothebys(max_price):
     url = "https://www.sothebys.com/en/buy/watches?sort=price-asc&price_range=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot-item'):
+        items = soup.select('.lot-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -291,16 +318,18 @@ def scrape_sothebys(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Sotheby’s', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_christies(max_price):
     url = "https://www.christies.com/en/auctions/watches?sortby=PriceLowToHigh&priceRange=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot'):
+        items = soup.select('.lot')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -326,16 +355,18 @@ def scrape_christies(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Christie’s', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_phillips(max_price):
     url = "https://www.phillips.com/auctions/department/watches?price_range=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot-item'):
+        items = soup.select('.lot-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -361,16 +392,18 @@ def scrape_phillips(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_bonhams(max_price):
     url = "https://www.bonhams.com/departments/WAT/?price_range=0-2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot'):
+        items = soup.select('.lot')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -396,16 +429,18 @@ def scrape_bonhams(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_antiquorum(max_price):
     url = "https://www.antiquorum.swiss/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot-item'):
+        items = soup.select('.lot-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -431,16 +466,18 @@ def scrape_antiquorum(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_watchuseek(max_price):
     url = "https://www.watchuseek.com/forums/watch-sales-forum.16/"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.thread'):
+        items = soup.select('.thread')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '') if item.select_one('.price') else '0'
                 price = float(price_str)
@@ -466,16 +503,18 @@ def scrape_watchuseek(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_reddit(max_price):
     url = "https://www.reddit.com/r/WatchExchange/new/"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.Post'):
+        items = soup.select('.Post')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '') if item.select_one('.price') else '0'
                 price = float(price_str)
@@ -501,16 +540,18 @@ def scrape_reddit(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_catawiki(max_price):
     url = "https://www.catawiki.com/en/c/7-watches?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot'):
+        items = soup.select('.lot')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('€', '').replace(',', '').strip()
                 price = get_usd_price(float(price_str), 'EUR')
@@ -536,16 +577,18 @@ def scrape_catawiki(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_timepeaks(max_price):
     url = "https://timepeaks.com/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.item'):
+        items = soup.select('.item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -571,16 +614,18 @@ def scrape_timepeaks(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_bobs_watches(max_price):
     url = "https://www.bobswatches.com/auctions?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.auction-item'):
+        items = soup.select('.auction-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -606,16 +651,18 @@ def scrape_bobs_watches(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_1stdibs(max_price):
     url = "https://www.1stdibs.com/jewelry/watches/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.item'):
+        items = soup.select('.item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -641,16 +688,18 @@ def scrape_1stdibs(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_watchcollecting(max_price):
     url = "https://watchcollecting.com/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot'):
+        items = soup.select('.lot')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -676,16 +725,18 @@ def scrape_watchcollecting(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_invaluable(max_price):
     url = "https://www.invaluable.com/watches/sc-7L7J8J8J8J/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot'):
+        items = soup.select('.lot')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -711,16 +762,18 @@ def scrape_invaluable(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def scrape_liveauctioneers(max_price):
     url = "https://www.liveauctioneers.com/c/watches/7/?price_max=2000"
     listings = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.lot'):
+        items = soup.select('.lot')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
                 price = float(price_str)
@@ -746,7 +799,7 @@ def scrape_liveauctioneers(max_price):
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
     update_logs(log_entry)
-    time.sleep(random.uniform(1, 3))
+    time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
 
 def detect_fake(row):
@@ -771,9 +824,11 @@ def scrape_ebay_sold(brand, model):
     url = f"https://www.ebay.com/sch/i.html?_nkw={brand}+{model}&LH_Sold=1&LH_Complete=1"
     sold_data = []
     try:
-        response = requests.get(url, headers=HEADERS, proxies=get_proxy(), timeout=10)
+        response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        for item in soup.select('.s-item'):
+        items = soup.select('.s-item')[:10]
+        for item in items:
             try:
                 price_str = item.select_one('.s-item__price').text.replace('$', '').replace(',', '')
                 price = float(price_str.split(' to ')[0] if ' to ' in price_str else price_str)
@@ -782,6 +837,6 @@ def scrape_ebay_sold(brand, model):
                 sold_data.append({'Price': price, 'Days Ago': days_ago})
             except:
                 continue
-    except:
+    except Exception as e:
         pass
     return sold_data
