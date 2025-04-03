@@ -5,7 +5,6 @@ from datetime import datetime
 import time
 import random
 
-# Bright Data proxy URL
 PROXY = "http://brd-customer-hl_a1966b18-zone-watcharbitrageproxy:qn8vxsi6tjtz@brd.superproxy.io:22225"
 def get_proxy():
     return {'http': PROXY, 'https': PROXY}
@@ -14,7 +13,6 @@ USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Mobile/15E148 Safari/604.1',
 ]
 
 HEADERS = {
@@ -23,6 +21,9 @@ HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Referer': 'https://www.google.com/',
     'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
 }
 
 def save_to_file(filename, data):
@@ -91,7 +92,7 @@ def scrape_ebay(max_price):
                 })
             except Exception as e:
                 print(f"eBay item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': len(soup.select('.s-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': len(soup.select('.s-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"eBay request failed: {str(e)}")
@@ -130,7 +131,7 @@ def scrape_chrono24(max_price):
                 })
             except Exception as e:
                 print(f"Chrono24 item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Chrono24', 'Listings Found': len(soup.select('.article-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Chrono24', 'Listings Found': len(soup.select('.article-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Chrono24', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Chrono24 request failed: {str(e)}")
@@ -169,7 +170,7 @@ def scrape_watchbox(max_price):
                 })
             except Exception as e:
                 print(f"WatchBox item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchBox', 'Listings Found': len(soup.select('.product-tile')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchBox', 'Listings Found': len(soup.select('.product-tile')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchBox', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"WatchBox request failed: {str(e)}")
@@ -208,7 +209,7 @@ def scrape_yahoo_japan(max_price):
                 })
             except Exception as e:
                 print(f"Yahoo Japan item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Yahoo Japan', 'Listings Found': len(soup.select('.Product')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Yahoo Japan', 'Listings Found': len(soup.select('.Product')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Yahoo Japan', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Yahoo Japan request failed: {str(e)}")
@@ -247,7 +248,7 @@ def scrape_jomashop(max_price):
                 })
             except Exception as e:
                 print(f"Jomashop item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Jomashop', 'Listings Found': len(soup.select('.product-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Jomashop', 'Listings Found': len(soup.select('.product-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Jomashop', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Jomashop request failed: {str(e)}")
@@ -286,7 +287,7 @@ def scrape_crown_caliber(max_price):
                 })
             except Exception as e:
                 print(f"Crown & Caliber item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Crown & Caliber', 'Listings Found': len(soup.select('.product-grid-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Crown & Caliber', 'Listings Found': len(soup.select('.product-grid-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Crown & Caliber', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Crown & Caliber request failed: {str(e)}")
@@ -325,7 +326,7 @@ def scrape_sothebys(max_price):
                 })
             except Exception as e:
                 print(f"Sotheby’s item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Sotheby’s', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Sotheby’s', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Sotheby’s', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Sotheby’s request failed: {str(e)}")
@@ -334,7 +335,7 @@ def scrape_sothebys(max_price):
     return pd.DataFrame(listings)
 
 def scrape_christies(max_price):
-    url = "https://www.christies.com/en/auctions/watches?sortby=PriceLowToHigh&priceRange=0-2000"
+    url = "https://www.christies.com/en/auctions/watches-online"  # Updated URL
     listings = []
     try:
         response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
@@ -364,7 +365,7 @@ def scrape_christies(max_price):
                 })
             except Exception as e:
                 print(f"Christie’s item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Christie’s', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Christie’s', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Christie’s', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Christie’s request failed: {str(e)}")
@@ -373,7 +374,7 @@ def scrape_christies(max_price):
     return pd.DataFrame(listings)
 
 def scrape_phillips(max_price):
-    url = "https://www.phillips.com/auctions/department/watches?price_range=0-2000"
+    url = "https://www.phillips.com/watches"  # Updated URL
     listings = []
     try:
         response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
@@ -403,7 +404,7 @@ def scrape_phillips(max_price):
                 })
             except Exception as e:
                 print(f"Phillips item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Phillips request failed: {str(e)}")
@@ -412,7 +413,7 @@ def scrape_phillips(max_price):
     return pd.DataFrame(listings)
 
 def scrape_bonhams(max_price):
-    url = "https://www.bonhams.com/departments/WAT/?price_range=0-2000"
+    url = "https://www.bonhams.com/department/WAT-03/watches/"  # Updated URL
     listings = []
     try:
         response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10, verify=False)
@@ -442,7 +443,7 @@ def scrape_bonhams(max_price):
                 })
             except Exception as e:
                 print(f"Bonhams item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Bonhams request failed: {str(e)}")
@@ -481,7 +482,7 @@ def scrape_antiquorum(max_price):
                 })
             except Exception as e:
                 print(f"Antiquorum item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Antiquorum request failed: {str(e)}")
@@ -520,7 +521,7 @@ def scrape_watchuseek(max_price):
                 })
             except Exception as e:
                 print(f"Watchuseek item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': len(soup.select('.thread')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': len(soup.select('.thread')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Watchuseek request failed: {str(e)}")
@@ -559,7 +560,7 @@ def scrape_reddit(max_price):
                 })
             except Exception as e:
                 print(f"Reddit item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': len(soup.select('.Post')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': len(soup.select('.Post')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Reddit request failed: {str(e)}")
@@ -598,7 +599,7 @@ def scrape_catawiki(max_price):
                 })
             except Exception as e:
                 print(f"Catawiki item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Catawiki request failed: {str(e)}")
@@ -637,7 +638,7 @@ def scrape_timepeaks(max_price):
                 })
             except Exception as e:
                 print(f"Timepeaks item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Timepeaks request failed: {str(e)}")
@@ -676,7 +677,7 @@ def scrape_bobs_watches(max_price):
                 })
             except Exception as e:
                 print(f"Bob’s Watches item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': len(soup.select('.auction-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': len(soup.select('.auction-item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Bob’s Watches request failed: {str(e)}")
@@ -715,7 +716,7 @@ def scrape_1stdibs(max_price):
                 })
             except Exception as e:
                 print(f"1stDibs item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"1stDibs request failed: {str(e)}")
@@ -754,7 +755,7 @@ def scrape_watchcollecting(max_price):
                 })
             except Exception as e:
                 print(f"WatchCollecting item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"WatchCollecting request failed: {str(e)}")
@@ -793,7 +794,7 @@ def scrape_invaluable(max_price):
                 })
             except Exception as e:
                 print(f"Invaluable item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"Invaluable request failed: {str(e)}")
@@ -832,7 +833,7 @@ def scrape_liveauctioneers(max_price):
                 })
             except Exception as e:
                 print(f"LiveAuctioneers item parse error: {str(e)}")
-        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': ''}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"LiveAuctioneers request failed: {str(e)}")
