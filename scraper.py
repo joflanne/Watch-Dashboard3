@@ -68,7 +68,8 @@ def scrape_ebay(max_price):
         response = requests.get(url, headers={**HEADERS, 'User-Agent': random.choice(USER_AGENTS)}, proxies=get_proxy(), timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        items = soup.select('.s-item')[:10]  # Limit to 10 items
+        items = soup.select('.s-item')[:10]
+        print(f"eBay response status: {response.status_code}, items found: {len(items)}")  # Debug
         for item in items:
             try:
                 price_str = item.select_one('.s-item__price').text.replace('$', '').replace(',', '')
@@ -90,11 +91,12 @@ def scrape_ebay(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"eBay item parse error: {str(e)}")  # Debug
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': len(soup.select('.s-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"eBay request failed: {str(e)}")  # Debug
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -107,6 +109,7 @@ def scrape_chrono24(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.article-item')[:10]
+        print(f"Chrono24 response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.strip().replace('$', '').replace(',', '')
@@ -127,11 +130,12 @@ def scrape_chrono24(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Chrono24 item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Chrono24', 'Listings Found': len(soup.select('.article-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Chrono24', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Chrono24 request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -144,6 +148,7 @@ def scrape_watchbox(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.product-tile')[:10]
+        print(f"WatchBox response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price-sales').text.strip().replace('$', '').replace(',', '')
@@ -164,11 +169,12 @@ def scrape_watchbox(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"WatchBox item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchBox', 'Listings Found': len(soup.select('.product-tile')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchBox', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"WatchBox request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -181,6 +187,7 @@ def scrape_yahoo_japan(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.Product')[:10]
+        print(f"Yahoo Japan response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.Product__priceValue').text.replace('¥', '').replace(',', '')
@@ -201,11 +208,12 @@ def scrape_yahoo_japan(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Yahoo Japan item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Yahoo Japan', 'Listings Found': len(soup.select('.Product')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Yahoo Japan', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Yahoo Japan request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -218,6 +226,7 @@ def scrape_jomashop(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.product-item')[:10]
+        print(f"Jomashop response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
@@ -238,11 +247,12 @@ def scrape_jomashop(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Jomashop item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Jomashop', 'Listings Found': len(soup.select('.product-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Jomashop', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Jomashop request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -255,6 +265,7 @@ def scrape_crown_caliber(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.product-grid-item')[:10]
+        print(f"Crown & Caliber response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price__current').text.replace('$', '').replace(',', '')
@@ -275,11 +286,12 @@ def scrape_crown_caliber(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Crown & Caliber item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Crown & Caliber', 'Listings Found': len(soup.select('.product-grid-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Crown & Caliber', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Crown & Caliber request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -292,6 +304,7 @@ def scrape_sothebys(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot-item')[:10]
+        print(f"Sotheby’s response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
@@ -312,11 +325,12 @@ def scrape_sothebys(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Sotheby’s item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Sotheby’s', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Sotheby’s', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Sotheby’s request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -329,6 +343,7 @@ def scrape_christies(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
+        print(f"Christie’s response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
@@ -349,11 +364,12 @@ def scrape_christies(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Christie’s item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Christie’s', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Christie’s', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Christie’s request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -366,6 +382,7 @@ def scrape_phillips(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot-item')[:10]
+        print(f"Phillips response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
@@ -386,11 +403,12 @@ def scrape_phillips(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Phillips item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Phillips', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Phillips request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -403,6 +421,7 @@ def scrape_bonhams(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
+        print(f"Bonhams response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
@@ -423,11 +442,12 @@ def scrape_bonhams(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Bonhams item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bonhams', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Bonhams request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -440,6 +460,7 @@ def scrape_antiquorum(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot-item')[:10]
+        print(f"Antiquorum response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
@@ -460,11 +481,12 @@ def scrape_antiquorum(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Antiquorum item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': len(soup.select('.lot-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Antiquorum', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Antiquorum request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -477,6 +499,7 @@ def scrape_watchuseek(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.thread')[:10]
+        print(f"Watchuseek response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '') if item.select_one('.price') else '0'
@@ -497,11 +520,12 @@ def scrape_watchuseek(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Watchuseek item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': len(soup.select('.thread')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Watchuseek', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Watchuseek request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -514,6 +538,7 @@ def scrape_reddit(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.Post')[:10]
+        print(f"Reddit response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '') if item.select_one('.price') else '0'
@@ -534,11 +559,12 @@ def scrape_reddit(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Reddit item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': len(soup.select('.Post')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Reddit WatchExchange', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Reddit request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -551,6 +577,7 @@ def scrape_catawiki(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
+        print(f"Catawiki response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('€', '').replace(',', '').strip()
@@ -571,11 +598,12 @@ def scrape_catawiki(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Catawiki item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Catawiki', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Catawiki request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -588,6 +616,7 @@ def scrape_timepeaks(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.item')[:10]
+        print(f"Timepeaks response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
@@ -608,11 +637,12 @@ def scrape_timepeaks(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Timepeaks item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Timepeaks', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Timepeaks request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -625,6 +655,7 @@ def scrape_bobs_watches(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.auction-item')[:10]
+        print(f"Bob’s Watches response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
@@ -645,11 +676,12 @@ def scrape_bobs_watches(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Bob’s Watches item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': len(soup.select('.auction-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Bob’s Watches', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Bob’s Watches request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -662,6 +694,7 @@ def scrape_1stdibs(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.item')[:10]
+        print(f"1stDibs response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.price').text.replace('$', '').replace(',', '')
@@ -682,11 +715,12 @@ def scrape_1stdibs(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"1stDibs item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': len(soup.select('.item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': '1stDibs', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"1stDibs request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -699,6 +733,7 @@ def scrape_watchcollecting(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
+        print(f"WatchCollecting response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
@@ -719,11 +754,12 @@ def scrape_watchcollecting(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"WatchCollecting item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'WatchCollecting', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"WatchCollecting request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -736,6 +772,7 @@ def scrape_invaluable(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
+        print(f"Invaluable response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
@@ -756,11 +793,12 @@ def scrape_invaluable(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"Invaluable item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'Invaluable', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"Invaluable request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -773,6 +811,7 @@ def scrape_liveauctioneers(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.lot')[:10]
+        print(f"LiveAuctioneers response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.lot-price').text.replace('$', '').replace(',', '')
@@ -793,11 +832,12 @@ def scrape_liveauctioneers(max_price):
                     'Image URL': image_url,
                     'Description': title
                 })
-            except:
-                continue
+            except Exception as e:
+                print(f"LiveAuctioneers item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': len(soup.select('.lot')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'LiveAuctioneers', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
+        print(f"LiveAuctioneers request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -828,6 +868,7 @@ def scrape_ebay_sold(brand, model):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.s-item')[:10]
+        print(f"eBay Sold response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.s-item__price').text.replace('$', '').replace(',', '')
@@ -835,8 +876,8 @@ def scrape_ebay_sold(brand, model):
                 date_sold = item.select_one('.s-item__ended-date').text.strip()
                 days_ago = (datetime.now() - datetime.strptime(date_sold, '%b-%d %H:%M')).days
                 sold_data.append({'Price': price, 'Days Ago': days_ago})
-            except:
-                continue
+            except Exception as e:
+                print(f"eBay Sold item parse error: {str(e)}")
     except Exception as e:
-        pass
+        print(f"eBay Sold request failed: {str(e)}")
     return sold_data
