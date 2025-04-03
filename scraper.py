@@ -5,12 +5,10 @@ from datetime import datetime
 import time
 import random
 
-# Bright Data proxy URL with your credentials
 PROXY = "http://brd-customer-hl_a1966b18-zone-watcharbitrageproxy:qn8vxsi6tjtz@brd.superproxy.io:22225"
 def get_proxy():
     return {'http': PROXY, 'https': PROXY}
 
-# Rotating User-Agents to mimic real browsers
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15',
@@ -18,7 +16,6 @@ USER_AGENTS = [
     'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Mobile/15E148 Safari/604.1',
 ]
 
-# Headers to emulate a real browser
 HEADERS = {
     'User-Agent': random.choice(USER_AGENTS),
     'Accept-Language': 'en-US,en;q=0.9',
@@ -69,7 +66,7 @@ def scrape_ebay(max_price):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         items = soup.select('.s-item')[:10]
-        print(f"eBay response status: {response.status_code}, items found: {len(items)}")  # Debug
+        print(f"eBay response status: {response.status_code}, items found: {len(items)}")
         for item in items:
             try:
                 price_str = item.select_one('.s-item__price').text.replace('$', '').replace(',', '')
@@ -92,11 +89,11 @@ def scrape_ebay(max_price):
                     'Description': title
                 })
             except Exception as e:
-                print(f"eBay item parse error: {str(e)}")  # Debug
+                print(f"eBay item parse error: {str(e)}")
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': len(soup.select('.s-item')), 'Listings Saved': len(listings), 'Errors': 'None'}
     except Exception as e:
         log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
-        print(f"eBay request failed: {str(e)}")  # Debug
+        print(f"eBay request failed: {str(e)}")
     update_logs(log_entry)
     time.sleep(random.uniform(2, 5))
     return pd.DataFrame(listings)
@@ -878,6 +875,9 @@ def scrape_ebay_sold(brand, model):
                 sold_data.append({'Price': price, 'Days Ago': days_ago})
             except Exception as e:
                 print(f"eBay Sold item parse error: {str(e)}")
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay Sold', 'Listings Found': len(soup.select('.s-item')), 'Listings Saved': len(sold_data), 'Errors': 'None'}
     except Exception as e:
+        log_entry = {'Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M'), 'Platform': 'eBay Sold', 'Listings Found': 0, 'Listings Saved': 0, 'Errors': str(e)}
         print(f"eBay Sold request failed: {str(e)}")
+    update_logs(log_entry)
     return sold_data
